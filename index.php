@@ -1,10 +1,16 @@
 <?php
     require_once("config.php");
 
-    $root = new User();
+    $user = new User();
 
-    $root->loadById(3);
+    $user->login("SAMUEL@GMAIL.COM", "335231");
+    //$user->loadById(3);
 
-    echo($root);
+    //$list = User::getList();
+
+    //$search = User::search("E");
+
+    echo $user;
+    //echo($root);
 
 ?>

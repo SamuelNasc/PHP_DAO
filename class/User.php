@@ -53,6 +53,35 @@
             }
         }
 
+        public static function getList(){
+            $sql = new Sql();
+            return $sql->select("SELECT * FROM TB_USERS ORDER BY USER_LOGIN");
+        }
+
+        public static function search($login){
+            $sql = new Sql();
+            return $sql->select("SELECT * FROM TB_USERS WHERE USER_LOGIN LIKE :SEARCH ORDER BY USER_LOGIN", array(
+                ":SEARCH"=>"%" . $login . "%"
+            ));
+        }
+
+        public function login($login, $password){
+            $sql = new Sql();
+            $result = $sql->select("SELECT * FROM TB_USERS WHERE USER_LOGIN = :LOGIN AND USER_PASSWORD = :PASSWORD" , array(
+                ":LOGIN"=>$login, 
+                ":PASSWORD"=>$password
+            ));
+            if(count($result) > 0){
+                $row = $result[0];
+                $this->setUserId($row['USER_ID']);
+                $this->setUserLogin($row['USER_LOGIN']);
+                $this->setUserPassword($row['USER_PASSWORD']);
+                $this->setUserRegister(new DateTime($row['USER_REGISTER']));
+            }
+            else
+                throw new Exception("Wrong login or password");
+        }
+
         public function __toString()
         {
             return json_encode(array(
