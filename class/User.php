@@ -6,6 +6,13 @@
         private $userPassword;
         private $userRegister;
 
+
+        public function __construct($login = "", $password = "")
+        {
+            $this->setUserLogin($login);
+            $this->setUserPassword($password);
+        }
+
         public function getUserId(){
             return $this->userId;
         }
@@ -45,11 +52,7 @@
             ));
 
             if(count($result) > 0){
-                $row = $result[0];
-                $this->setUserId($row['USER_ID']);
-                $this->setUserLogin($row['USER_LOGIN']);
-                $this->setUserPassword($row['USER_PASSWORD']);
-                $this->setUserRegister(new DateTime($row['USER_REGISTER']));
+                $this->setData($result[0]);
             }
         }
 
@@ -72,14 +75,53 @@
                 ":PASSWORD"=>$password
             ));
             if(count($result) > 0){
-                $row = $result[0];
-                $this->setUserId($row['USER_ID']);
-                $this->setUserLogin($row['USER_LOGIN']);
-                $this->setUserPassword($row['USER_PASSWORD']);
-                $this->setUserRegister(new DateTime($row['USER_REGISTER']));
+                $this->setData($result[0]);
             }
             else
                 throw new Exception("Wrong login or password");
+        }
+
+        public function insert(){
+            $sql = new Sql();
+            $results = $sql->select("CALL sp_insert_users(:LOGIN, :PASSWORD)", array(
+                ':LOGIN'=>$this->getUserLogin(),
+                ':PASSWORD'=>$this->getUserPassword()
+            ));
+
+            if(count($results) > 0)
+                $this->setData($results[0]);
+        }
+
+        public function update($login, $password){
+
+            $this->setUserLogin($login);
+            $this->setUserPassword($password);
+
+            $sql = new SQL();
+            $sql->query("UPDATE TB_USERS SET USER_LOGIN = :LOGIN, USER_PASSWORD = :PASSWORD WHERE USER_ID = :ID", ARRAY(
+                ':LOGIN'=>$this->getUserLogin(),
+                ':PASSWORD'=>$this->getUserPassword(),
+                ':ID'=>$this->getUserId()
+            ));
+        }
+
+        public function delete(){
+            $sql = new Sql();
+            $sql->query("DELETE FROM TB_USERS WHERE USER_ID = :ID", array(
+                ':ID'=>$this->getUserId()
+            ));
+
+            $this->setUserId(0);
+            $this->setUserLogin("");
+            $this->setUserPassword("");
+            $this->setUserRegister(new DateTime());
+        }
+
+        public function setData($data){
+                $this->setUserId($data['USER_ID']);
+                $this->setUserLogin($data['USER_LOGIN']);
+                $this->setUserPassword($data['USER_PASSWORD']);
+                $this->setUserRegister(new DateTime($data['USER_REGISTER']));
         }
 
         public function __toString()
